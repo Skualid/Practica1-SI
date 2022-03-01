@@ -3,34 +3,32 @@ import pandas as pd
 import numpy as np
 import json
 
-def sql_update(con):
-    cursorObj = con.cursor()
-    cursorObj.execute('UPDATE usuarios SET nombre = "Sergio" where dni = "X"')
-    con.commit()
-
-def sql_fetch(con):
-   cursorObj = con.cursor()
-   cursorObj.execute('SELECT * FROM usuarios')
-   #SELECT dni, nombre FROM usuarios WHERE altura > 1.0
-   rows = cursorObj.fetchall()
-   for row in rows:
-      print(row)
-
-def sql_delete(con):
-    cursorObj = con.cursor()
-    cursorObj.execute('DELETE FROM usuarios where dni = "X"')
-    con.commit()
-
-def sql_delete_table(con):
-    cursorObj = con.cursor()
-    cursorObj.execute('drop table if exists usuarios')
-    con.commit()
 
 def sql_create_table(con):
     cursorObj = con.cursor()
-    cursorObj.execute("CREATE TABLE IF NOT EXISTS usuarios (nombre text, telefono int, contraseña text, provincia text, permisos int, email_total int, email_phishing int, email_clicados int, PRIMARY KEY(nombre))")
-    cursorObj.execute("CREATE TABLE IF NOT EXISTS fecha (nombre text, fecha text, PRIMARY KEY(nombre, fecha) , FOREIGN KEY(nombre) REFERENCES usuarios(nombre))")
-    cursorObj.execute("CREATE TABLE IF NOT EXISTS ip (nombre text, ip text, PRIMARY KEY(nombre, ip) , FOREIGN KEY(nombre) REFERENCES usuarios(nombre))")
+
+    # Esta forma de crear tablas además de ser poco robusta, es vulnerable a inyección SQL.
+    '''cursorObj.execute(
+        "CREATE TABLE IF NOT EXISTS usuarios (nombre text, telefono int, contraseña text, provincia text, permisos int, email_total int, email_phishing int, email_clicados int, PRIMARY KEY(nombre))")
+    cursorObj.execute(
+        "CREATE TABLE IF NOT EXISTS fecha (nombre text, fecha text, PRIMARY KEY(nombre, fecha) , FOREIGN KEY(nombre) REFERENCES usuarios(nombre))")
+    cursorObj.execute(
+        "CREATE TABLE IF NOT EXISTS ip (nombre text, ip text, PRIMARY KEY(nombre, ip) , FOREIGN KEY(nombre) REFERENCES usuarios(nombre))")'''
+
+
+    #Utilizamos SQL parametrizado
+    sql_user = '''CREATE TABLE IF NOT EXISTS usuarios (nombre text, telefono int, contraseña text, provincia text, permisos int, email_total int, email_phishing int, email_clicados int, PRIMARY KEY(nombre))'''
+    sql_fecha = '''CREATE TABLE IF NOT EXISTS fecha (nombre text, fecha text, PRIMARY KEY(nombre, fecha) , FOREIGN KEY(nombre) REFERENCES usuarios(nombre))'''
+    sql_ip = '''CREATE TABLE IF NOT EXISTS ip (nombre text, ip text, PRIMARY KEY(nombre, ip) , FOREIGN KEY(nombre) REFERENCES usuarios(nombre))'''
+
+    cursorObj.execute(sql_user)
+    cursorObj.execute(sql_fecha)
+    cursorObj.execute(sql_ip)
+
+    con.commit()
+
+def sql_insert_json(con):
+    cursorObj = con.cursor()
 
     with open('../Statement/Logs/users.json', 'r') as f:
         data = json.load(f)
@@ -46,26 +44,34 @@ def sql_create_table(con):
             provincia = data['usuarios'][usuario][nombre]['provincia']
             permisos = int(data['usuarios'][usuario][nombre]['permisos'])
 
-
             email_total = data['usuarios'][usuario][nombre]['emails']['total']
             email_phishing = data['usuarios'][usuario][nombre]['emails']['phishing']
             email_clicados = data['usuarios'][usuario][nombre]['emails']['cliclados']
 
+            datos_user_i =  [nombre, telefono, contraseña, provincia, permisos, email_total, email_phishing, email_clicados]
 
-            cursorObj.execute("INSERT INTO usuarios VALUES (nombre, telefono, contraseña, provincia, permisos, email_total, email_phishing, email_clicados) ")
+            #Esta forma de hacer INSERT además de ser poco robusta, es vulnerable a inyección SQL.
+            #cursorObj.execute(
+            #    "INSERT INTO usuarios VALUES (nombre, telefono, contraseña, provincia, permisos, email_total, email_phishing, email_clicados) ")
+
+            #Utilizamos SQL parametrizado
+            sql = ''' INSERT INTO usuarios (nombre, telefono, contraseña, provincia, permisos, email_total, email_phishing, email_clicados) VALUES(?,?,?,?,?,?,?,?) '''
+
+            #cursorObj.execute(sql, datos_user_i)
             con.commit()
 
-    con.commit()
+            #print(len(data['usuarios'][usuario][nombre]['fechas']))
+
+            for fechas in range(len(data['usuarios'][usuario][nombre]['fechas'])):
+                for fecha in data['usuarios'][usuario][nombre]['fechas'][fechas]:
+                    print(fecha, end=" ")
+
 
 
 
 con = sqlite3.connect('example.db')
-sql_create_table(con)
-#sql_fetch(con)
-#sql_update(con)
-#sql_fetch(con)
-#sql_delete(con)
-#sql_fetch(con)
-#sql_delete_table(con)
-con.close()
 
+sql_create_table(con)
+sql_insert_json(con)
+
+con.close()
