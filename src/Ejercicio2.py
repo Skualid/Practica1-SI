@@ -20,14 +20,16 @@ def sql_create_table(con):
     sql_user = '''CREATE TABLE IF NOT EXISTS usuarios (nombre text, telefono int, contraseña text, provincia text, permisos int, email_total int, email_phishing int, email_clicados int, PRIMARY KEY(nombre))'''
     sql_fecha = '''CREATE TABLE IF NOT EXISTS fecha (nombre text, fecha text, PRIMARY KEY(nombre, fecha) , FOREIGN KEY(nombre) REFERENCES usuarios(nombre))'''
     sql_ip = '''CREATE TABLE IF NOT EXISTS ip (nombre text, ip text, PRIMARY KEY(nombre, ip) , FOREIGN KEY(nombre) REFERENCES usuarios(nombre))'''
+    sql_legal = '''CREATE TABLE IF NOT EXISTS legal (url text, cookies int, aviso int, proteccion_de_datos int, creacion int, PRIMARY KEY(url))'''
 
     cursorObj.execute(sql_user)
     cursorObj.execute(sql_fecha)
     cursorObj.execute(sql_ip)
+    cursorObj.execute(sql_legal)
 
     con.commit()
 
-def sql_insert_json(con):
+def sql_insert_json_user(con):
     cursorObj = con.cursor()
 
     with open('../Statement/Logs/users.json', 'r') as f:
@@ -57,21 +59,56 @@ def sql_insert_json(con):
             #Utilizamos SQL parametrizado
             sql = ''' INSERT INTO usuarios (nombre, telefono, contraseña, provincia, permisos, email_total, email_phishing, email_clicados) VALUES(?,?,?,?,?,?,?,?) '''
 
-            #cursorObj.execute(sql, datos_user_i)
+            cursorObj.execute(sql, datos_user_i)
             con.commit()
 
-            #print(len(data['usuarios'][usuario][nombre]['fechas']))
 
-            for fechas in range(len(data['usuarios'][usuario][nombre]['fechas'])):
-                for fecha in data['usuarios'][usuario][nombre]['fechas'][fechas]:
-                    print(fecha, end=" ")
+            for fecha in range(len(data['usuarios'][usuario][nombre]['fechas'])):
+                sql = ''' INSERT INTO fecha (nombre, fecha) VALUES(?,?) '''
+
+                fechas = data['usuarios'][usuario][nombre]['fechas'][fecha]
+
+                datos_fecha_i = [nombre, fechas]
+                #cursorObj.execute(sql, datos_fecha_i)
+                #con.commit()
+
+            for ip in range(len(data['usuarios'][usuario][nombre]['ips'])):
+                sql = ''' INSERT INTO ip (nombre, ip) VALUES(?,?) '''
+
+                ips = data['usuarios'][usuario][nombre]['ips'][ip]
+
+                datos_ip_i = [nombre, ips]
+                cursorObj.execute(sql, datos_ip_i)
+                con.commit()
 
 
+def sql_insert_json_legal(con):
+    cursorObj = con.cursor()
+
+    with open('../Statement/Logs/legal.json', 'r') as f:
+        data = json.load(f)
+
+    for legal in range(len(data['legal'])):
+        for url in data['legal'][legal].keys():
+
+            cookies = data['legal'][legal][url]['cookies']
+
+            aviso = data['legal'][legal][url]['cookies']
+            proteccion_de_datos = data['legal'][legal][url]['cookies']
+            creacion = data['legal'][legal][url]['cookies']
+
+            datos_legal_i =  [url, cookies, aviso, proteccion_de_datos, creacion]
+
+            #Utilizamos SQL parametrizado
+            sql = ''' INSERT INTO legal (url, cookies, aviso, proteccion_de_datos, creacion) VALUES(?,?,?,?,?) '''
+
+            cursorObj.execute(sql, datos_legal_i)
+            con.commit()
 
 
 con = sqlite3.connect('example.db')
 
 sql_create_table(con)
-sql_insert_json(con)
-
+sql_insert_json_user(con)
+sql_insert_json_legal(con)
 con.close()
