@@ -69,8 +69,8 @@ def sql_insert_json_user(con):
                 fechas = data['usuarios'][usuario][nombre]['fechas'][fecha]
 
                 datos_fecha_i = [nombre, fechas]
-                #cursorObj.execute(sql, datos_fecha_i)
-                #con.commit()
+                cursorObj.execute(sql, datos_fecha_i)
+                con.commit()
 
             for ip in range(len(data['usuarios'][usuario][nombre]['ips'])):
                 sql = ''' INSERT INTO ip (nombre, ip) VALUES(?,?) '''
@@ -92,7 +92,6 @@ def sql_insert_json_legal(con):
         for url in data['legal'][legal].keys():
 
             cookies = data['legal'][legal][url]['cookies']
-
             aviso = data['legal'][legal][url]['cookies']
             proteccion_de_datos = data['legal'][legal][url]['cookies']
             creacion = data['legal'][legal][url]['cookies']
@@ -105,10 +104,77 @@ def sql_insert_json_legal(con):
             cursorObj.execute(sql, datos_legal_i)
             con.commit()
 
+def apartado_1(con):
+   cursorObj = con.cursor()
+   cursorObj.execute('SELECT distinct * FROM usuarios')
+   rows = cursorObj.fetchall()
+
+
+   pd1 = pd.DataFrame(rows)
+   print(pd1)
+   print("El númeor de muestras es: ", pd1[1].count())
+
+
+def apartado_2(con):
+   cursorObj = con.cursor()
+   cursorObj.execute('SELECT nombre,  COUNT(fecha)  FROM fecha GROUP BY nombre')
+   rows = cursorObj.fetchall()
+
+
+   pd1 = pd.DataFrame(rows)
+   print(pd1)
+   print("El valor de la media es: ", pd1[1].mean())
+   print("El valor de la desviación estándar es: ", pd1[1].std())
+
+def apartado_3(con):
+    cursorObj = con.cursor()
+    cursorObj.execute('SELECT nombre,  COUNT(ip)  FROM ip GROUP BY nombre')
+    rows = cursorObj.fetchall()
+
+    pd1 = pd.DataFrame(rows)
+    print(pd1)
+    print("El valor de la media es: ", pd1[1].mean())
+    print("El valor de la desviación estándar es: ", pd1[1].std())
+
+def apartado_4(con):
+    cursorObj = con.cursor()
+    cursorObj.execute('SELECT nombre, email_total  FROM usuarios')
+    rows = cursorObj.fetchall()
+
+    pd1 = pd.DataFrame(rows)
+    print(pd1)
+    print("El valor de la media es: ", pd1[1].mean())
+    print("El valor de la desviación estándar es: ", pd1[1].std())
+
+def apartado_5(con):
+    cursorObj = con.cursor()
+    cursorObj.execute('SELECT nombre,  COUNT(fecha)  FROM fecha GROUP BY nombre')
+    rows = cursorObj.fetchall()
+
+    pd1 = pd.DataFrame(rows)
+    print(pd1)
+    print("El valor maximo es: ", pd1[1].max())
+    print("El valor mínimo es: ", pd1[1].min())
+
+def apartado_6(con):
+    cursorObj = con.cursor()
+    cursorObj.execute('SELECT nombre, email_total  FROM usuarios')
+    rows = cursorObj.fetchall()
+
+    pd1 = pd.DataFrame(rows)
+    print(pd1)
+    print("El valor maximo es: ", pd1[1].max())
+    print("El valor mínimo es: ", pd1[1].min())
 
 con = sqlite3.connect('example.db')
 
-sql_create_table(con)
-sql_insert_json_user(con)
-sql_insert_json_legal(con)
+#sql_create_table(con)
+#sql_insert_json_user(con)
+#sql_insert_json_legal(con)
+apartado_1(con)
+#apartado_2(con)
+#apartado_3(con)
+#apartado_4(con)
+#apartado_5(con)
+#apartado_6(con)
 con.close()
