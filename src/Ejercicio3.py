@@ -74,7 +74,6 @@ def main():
    resultados(pd4, "Administradores", "igual o más")
 
 
-
 con = sqlite3.connect('example.db')
 main()
 con.close()
