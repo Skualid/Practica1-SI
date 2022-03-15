@@ -5,6 +5,4 @@ import pandas
 
 import json
 
-import numpy
-
 import sqlite3
