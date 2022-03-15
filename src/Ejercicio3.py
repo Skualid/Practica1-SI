@@ -5,7 +5,7 @@ def apartado_1(pd):
    print("tienen un total de muestras de: ", pd["email_phishing"].sum())
 
 def apartado_2(pd):
-   # Contar valores missing
+   #Contar valores missing
    contador = 0
    for fila in pd["email_phishing"]:
       if str(fila) == 'None' or str(fila) == '-1' or str(fila) == '':

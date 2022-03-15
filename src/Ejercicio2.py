@@ -108,9 +108,9 @@ def sql_insert_json_legal(con):
         for url in data['legal'][legal].keys():
 
             cookies = data['legal'][legal][url]['cookies']
-            aviso = data['legal'][legal][url]['cookies']
-            proteccion_de_datos = data['legal'][legal][url]['cookies']
-            creacion = data['legal'][legal][url]['cookies']
+            aviso = data['legal'][legal][url]['aviso']
+            proteccion_de_datos = data['legal'][legal][url]['proteccion_de_datos']
+            creacion = data['legal'][legal][url]['creacion']
 
             datos_legal_i =  [url, cookies, aviso, proteccion_de_datos, creacion]
 
@@ -144,12 +144,12 @@ def apartado_1(con):
    pd4 = pd.DataFrame(ip)
    pd4.rename(columns={0:"nombre", 1:"ip"}, inplace=True)
 
-   print("APARTADO 1\n-------------------------------------------\n" + "Número de muestras\n")
+   print("--------------- APARTADO 1 ----------------\n" + "\t\t\tNúmero de muestras\n")
    print("El número de muestras de usuarios es: ", pd1['nombre'].count())
    print("El número de muestras de webs es: ", pd2['url'].count())
 
    #Contar valores missing
-   print("-------------------------------------------\n" + "Valores missing en tabla usuarios\n")
+   print("-------------------------------------------\n" + "\tValores missing en tabla usuarios\n")
    for columna in pd1:
        contador = 0
        for fila in pd1[columna]:
@@ -157,7 +157,7 @@ def apartado_1(con):
                contador += 1
        print("En la columna",columna , "hay", contador, "missing")
 
-   print("-------------------------------------------\n" + "Valores missing en tabla fecha\n")
+   print("-------------------------------------------\n" + "\tValores missing en tabla fecha\n")
    for columna in pd3:
        contador = 0
        for fila in pd3[columna]:
@@ -165,7 +165,7 @@ def apartado_1(con):
                contador += 1
        print("En la columna", columna, "hay", contador, "missing")
 
-   print("-------------------------------------------\n" + "Valores missing en tabla ip\n")
+   print("-------------------------------------------\n" + "\t\tValores missing en tabla ip\n")
    for columna in pd4:
        contador = 0
        for fila in pd4[columna]:
@@ -174,7 +174,7 @@ def apartado_1(con):
        print("En la columna", columna, "hay", contador, "missing")
 
 
-   print("-------------------------------------------\n" + "Valores missing en tabla legal\n")
+   print("-------------------------------------------\n" + "\tValores missing en tabla legal\n")
    for columna in pd2:
        contador = 0
        for fila in pd2[columna]:
@@ -183,7 +183,7 @@ def apartado_1(con):
 
        print("En la columna", columna, "hay", contador, "missing")
 
-   print("-------------------------------------------\n\nAPARTADO 2")
+   print("-------------------------------------------\n")
 
 def apartado_2(con):
    cursorObj = con.cursor()
@@ -192,10 +192,11 @@ def apartado_2(con):
 
    pd1 = pd.DataFrame(rows)
 
+   print("--------------- APARTADO 2 ----------------\n")
    pd1[1] += pd1[2] #sumo al total de fechas de cada usuario las repetidas
    print("El valor de la media es: ", pd1[1].mean())
    print("El valor de la desviación estándar es: ", pd1[1].std())
-   print("-------------------------------------------\n\nAPARTADO 3")
+   print("-------------------------------------------\n")
 
 def apartado_3(con):
     cursorObj = con.cursor()
@@ -203,9 +204,10 @@ def apartado_3(con):
     rows = cursorObj.fetchall()
 
     pd1 = pd.DataFrame(rows)
+    print("--------------- APARTADO 3 ----------------\n")
     print("El valor de la media es: ", pd1[1].mean())
     print("El valor de la desviación estándar es: ", pd1[1].std())
-    print("-------------------------------------------\n\nAPARTADO 4")
+    print("-------------------------------------------\n")
 
 def apartado_4(con):
     cursorObj = con.cursor()
@@ -213,9 +215,10 @@ def apartado_4(con):
     rows = cursorObj.fetchall()
 
     pd1 = pd.DataFrame(rows)
+    print("--------------- APARTADO 4 ----------------\n")
     print("El valor de la media es: ", pd1[1].mean())
     print("El valor de la desviación estándar es: ", pd1[1].std())
-    print("-------------------------------------------\n\nAPARTADO 5")
+    print("-------------------------------------------\n")
 
 def apartado_5(con):
     cursorObj = con.cursor()
@@ -224,9 +227,10 @@ def apartado_5(con):
 
     pd1 = pd.DataFrame(rows)
     pd1[1] += pd1[2]  # sumo al total de fechas de cada usuario las repetidas
+    print("--------------- APARTADO 5 ----------------\n")
     print("El valor maximo es: ", pd1[1].max())
     print("El valor mínimo es: ", pd1[1].min())
-    print("-------------------------------------------\n\nAPARTADO 6")
+    print("-------------------------------------------\n")
 
 def apartado_6(con):
     cursorObj = con.cursor()
@@ -234,6 +238,7 @@ def apartado_6(con):
     rows = cursorObj.fetchall()
 
     pd1 = pd.DataFrame(rows)
+    print("--------------- APARTADO 6 ----------------\n")
     print("El valor maximo es: ", pd1[1].max())
     print("El valor mínimo es: ", pd1[1].min())
     print("-------------------------------------------\n")
