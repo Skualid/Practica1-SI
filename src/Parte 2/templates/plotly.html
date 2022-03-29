@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Grafico</title>
+</head>
+<body>
+<h1>Usuarios vulnerables</h1>
+
+  <form action="/param" method="post">
+  <label for="numero">Introduce cuantos user quieres ver</label><br>
+  <input type="number" id="numero" name="numero"><br>
+  <input type="submit" value="Submit">
+  </form>
+
+{% if graphJSON %}
+  <div id='chart' class='chart'”></div>
+  <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+  <script type='text/javascript'>
+      var graphs = {{graphJSON | safe}};
+      Plotly.plot('chart',graphs,{});
+  </script>
+{% endif %}
+</body>
+</html>
