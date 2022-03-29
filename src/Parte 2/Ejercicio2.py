@@ -9,6 +9,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 import json
 import plotly.graph_objects as go
 
+
 def usersVuln():
     con = sqlite3.connect('example.db')
     cursorObj = con.cursor()
@@ -52,28 +53,32 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+
 @app.route('/about.html')
 def about():
     return render_template('about.html')
+
 
 @app.route('/signin.html')
 def login():
     name = request.args.get('user')
     return render_template('signin.html', name=name, graphJSON=None)
 
+
 @app.route('/signup.html')
 def register():
     name = request.args.get('user')
     return render_template('signup.html', name=name, graphJSON=None)
+
 
 @app.route('/param', methods=['POST'])
 def param():
     filtro = request.form['numero']
     return plotly(filtro)
 
+
 @app.route('/plotly.html/<filtro>')
 def plotly(filtro):
-
     pd1 = usersVuln()
     pd1 = pd1.head(int(filtro))
     if int(filtro) <= 0:
@@ -81,8 +86,11 @@ def plotly(filtro):
     else:
         return plotlyNoArgs(pd1)
 
+
 @app.route('/plotly.html')
 def plotlyNoArgs(pd2=None):
+    from plotly.subplots import make_subplots
+
     if pd2 is not None:
         pd1 = pd2
     else:
@@ -92,26 +100,33 @@ def plotlyNoArgs(pd2=None):
 
     ejex = pd1["nombre"]
 
-    fig = go.Figure()
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
     fig.add_trace(go.Bar(
         x=ejex,
         y=pd1['email_totales'],
         name='Emails totales',
-        marker_color='indianred'
+        marker_color='royalblue'
     ))
     fig.add_trace(go.Bar(
         x=ejex,
         y=pd1['email_phishing'],
         name='Emails phishing',
-        marker_color='lightsalmon'
+        marker_color='darkorange'
     ))
 
     fig.add_trace(go.Bar(
         x=ejex,
         y=pd1['email_clicados'],
         name='Emails clicados',
-        marker_color='blue'
-    ))
+        marker_color='lightgray'
+    ), secondary_y=False)
+    fig.add_trace(go.Scatter(
+        x=ejex,
+        y=pd1["ratio"],
+        name='Porcentaje clics Phising',
+        marker_color='gold'
+    ), secondary_y=True, )
 
     # Here we modify the tickangle of the xaxis, resulting in rotated labels.
     fig.update_layout(barmode='group', xaxis_tickangle=-45)
