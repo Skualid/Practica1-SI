@@ -4,11 +4,13 @@
 {% else %} 
 <h1>Hello, World!</h1> 
 {% endif %}
-  <form action="/hola" method="get">
+
+  <form action="/param" method="post">
   <label for="numero">Introduce cuantos user quieres ver</label><br>
   <input type="number" id="numero" name="numero"><br>
   <input type="submit" value="Submit">
   </form>
+
 {% if graphJSON %}
   <div id='chart' class='chart'”></div>
     <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>

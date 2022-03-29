@@ -9,10 +9,38 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 import json
 import plotly.graph_objects as go
 
+app = Flask(__name__)
 
-def main(con):
+
+@app.route('/')
+@app.route('/index.html')
+def index():
+    return render_template('index.html')
+
+@app.route('/about.html')
+def about():
+    return render_template('about.html')
+
+@app.route('/signin.html')
+def login():
+    name = request.args.get('user')
+    return render_template('signin.html', name=name, graphJSON=None)
+
+@app.route('/signup.html')
+def register():
+    name = request.args.get('user')
+    return render_template('signup.html', name=name, graphJSON=None)
+
+@app.route('/param', methods=['POST'])
+def param():
+    filtro = request.form['numero']
+    return plotly(filtro)
+
+
+@app.route('/plotly/<filtro>')
+def plotly(filtro):
+    con = sqlite3.connect('example.db')
     cursorObj = con.cursor()
-    ####     Apartado 1    ####
 
     cursorObj.execute('SELECT contraseña FROM usuarios')
     user = cursorObj.fetchall()
@@ -32,6 +60,8 @@ def main(con):
             user = cursorObj.fetchall()
             pd1 = pd1.append(user, ignore_index=True)
 
+    con.close()
+
     pd1.rename(columns={0: "nombre", 1: "email_totales", 2: "email_phishing", 3: "email_clicados"}, inplace=True)
 
     # Se añade una nueva columna que será el ratio de email clicados en función de los emails de phishing
@@ -40,66 +70,43 @@ def main(con):
     # Se ordena el Dataframe en función de la columna ratio
     pd1 = pd1.sort_values('ratio', ascending=False)
 
-    app = Flask(__name__)
+    pd1 = pd1.head(int(filtro))
 
-    @app.route('/')
-    def hello_world():
-        return '<p>Hello, World!</p>'
+    x = pd1["nombre"]
 
-    @app.route('/hello/')
-    @app.route('/hello/<name>')
-    def hello(name=None):
-        return render_template('hello.html', name=name, graphJSON=None)
+    ejex = pd1["nombre"]
 
-    @app.route('/login')
-    def login():
-        name = request.args.get('user')
-        return render_template('hello.html', name=name, graphJSON=None)
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=ejex,
+        y=pd1['email_totales'],
+        name='Emails totales',
+        marker_color='indianred'
+    ))
+    fig.add_trace(go.Bar(
+        x=ejex,
+        y=pd1['email_phishing'],
+        name='Emails phishing',
+        marker_color='lightsalmon'
+    ))
 
-    @app.route('/plotly', methods=['GET'])
-    def plotly():
+    fig.add_trace(go.Bar(
+        x=ejex,
+        y=pd1['email_clicados'],
+        name='Emails clicados',
+        marker_color='blue'
+    ))
 
-        filtro = request.form['numero']
-        print(filtro)
+    # Here we modify the tickangle of the xaxis, resulting in rotated labels.
+    fig.update_layout(barmode='group', xaxis_tickangle=-45)
 
-        x = pd1["nombre"]
+    import plotly
 
-        ejex = pd1["nombre"]
-
-        fig = go.Figure()
-        fig.add_trace(go.Bar(
-            x=ejex,
-            y=pd1['email_totales'],
-            name='Emails totales',
-            marker_color='indianred'
-        ))
-        fig.add_trace(go.Bar(
-            x=ejex,
-            y=pd1['email_phishing'],
-            name='Emails phishing',
-            marker_color='lightsalmon'
-        ))
-
-        fig.add_trace(go.Bar(
-            x=ejex,
-            y=pd1['email_clicados'],
-            name='Emails clicados',
-            marker_color='blue'
-        ))
-
-        # Here we modify the tickangle of the xaxis, resulting in rotated labels.
-        fig.update_layout(barmode='group', xaxis_tickangle=-45)
-
-        import plotly
-
-        a = plotly.utils.PlotlyJSONEncoder
-        graphJSON = json.dumps(fig, cls=a)
-        return render_template('hello.html', graphJSON=graphJSON)
-
-    if __name__ == '__main__':
-        app.run(debug=True)
+    a = plotly.utils.PlotlyJSONEncoder
+    graphJSON = json.dumps(fig, cls=a)
+    return render_template('hello.html', graphJSON=graphJSON)
 
 
-con = sqlite3.connect('example.db')
-main(con)
-con.close()
+if __name__ == '__main__':
+    app.run(debug=True)
+
