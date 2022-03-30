@@ -211,30 +211,36 @@ def plotly_webNoArgs(pd2=None):
 
     fig.add_trace(go.Bar(
         x=ejex,
-        y=pd1['cookies'],
+        y=pd1['cookies'].replace(to_replace=[0, 1], value=[1, 0]),
         name='cookies',
+        text=pd1['cookies'].replace(to_replace=[0, 1], value=[1, 0]),
+        textposition='auto',
         marker_color='royalblue'
     ))
     fig.add_trace(go.Bar(
         x=ejex,
-        y=pd1['aviso'],
+        y=pd1['aviso'].replace(to_replace=[0, 1], value=[1, 0]),
         name='Aviso',
+        text=pd1['aviso'].replace(to_replace=[0, 1], value=[1, 0]),
+        textposition='auto',
         marker_color='darkorange'
     ))
     fig.add_trace(go.Bar(
         x=ejex,
-        y=pd1['proteccion_de_datos'],
+        y=pd1['proteccion_de_datos'].replace(to_replace=[0, 1], value=[1, 0]),
         name='Protección de datos',
+        text=pd1['proteccion_de_datos'].replace(to_replace=[0, 1], value=[1, 0]),
+        textposition='auto',
         marker_color='lightgray'
     ), secondary_y=False)
 
     # Here we modify the tickangle of the xaxis, resulting in rotated labels.
-    fig.update_layout(barmode='group', xaxis_tickangle=-45, legend=dict(bgcolor="white"), paper_bgcolor="rgb(0,0,0,0)",
+    fig.update_layout(barmode='group', legend=dict(bgcolor="white"), paper_bgcolor="rgb(0,0,0,0)",
                       margin=dict(l=40, r=40, b=40, t=40))
 
     # fig.update_layout(paper_bgcolor="rgb(0,0,0,0)")
     fig.update_xaxes(color='white', automargin=True)
-    fig.update_yaxes(color='white', automargin=True)
+    fig.update_yaxes(color='white', automargin=True, showticklabels=False)
 
     import plotly
 
