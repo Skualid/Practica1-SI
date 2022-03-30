@@ -229,7 +229,12 @@ def plotly_webNoArgs(pd2=None):
     ), secondary_y=False)
 
     # Here we modify the tickangle of the xaxis, resulting in rotated labels.
-    fig.update_layout(barmode='group', xaxis_tickangle=-45)
+    fig.update_layout(barmode='group', xaxis_tickangle=-45, legend=dict(bgcolor="white"), paper_bgcolor="rgb(0,0,0,0)",
+                      margin=dict(l=40, r=40, b=40, t=40))
+
+    # fig.update_layout(paper_bgcolor="rgb(0,0,0,0)")
+    fig.update_xaxes(color='white', automargin=True)
+    fig.update_yaxes(color='white', automargin=True)
 
     import plotly
 
