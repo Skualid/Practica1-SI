@@ -44,6 +44,25 @@ def usersVuln():
 
     return pd1
 
+def websVuln():
+    con = sqlite3.connect('example.db')
+    cursorObj = con.cursor()
+
+    cursorObj.execute('SELECT url, cookies, aviso, proteccion_de_datos FROM legal')
+    legal = cursorObj.fetchall()
+    con.close()
+
+    pd2 = pd.DataFrame(legal)
+    pd2.rename(columns={0: "url", 1: "cookies", 2: "aviso", 3: "proteccion_de_datos"}, inplace=True)
+
+    # Se añade una nueva columna que será el número total de políticas que cumple la web
+    pd2['total_politicas'] = pd2['cookies'] + pd2['aviso'] + pd2['proteccion_de_datos']
+
+    # Se ordena el Dataframe en función de la columna total_politicas
+    pd2 = pd2.sort_values('total_politicas', ascending=True)
+
+    return pd2
+
 
 app = Flask(__name__)
 
@@ -76,27 +95,44 @@ def param():
     filtro = request.form['numero']
     return plotly(filtro)
 
+@app.route('/filtrar', methods=['POST'])
+def filtrar():
+    filtro =  request.form['filtrar']
+
+    if filtro == 'mas' or filtro == 'menos':
+        return plotly(filtro)
+    elif filtro == 'reset':
+        return plotlyNoArgs()
+    else:
+        return render_template('error.html')
 
 @app.route('/plotly.html/<filtro>')
 def plotly(filtro):
+
     pd1 = usersVuln()
-    pd1 = pd1.head(int(filtro))
-    if int(filtro) <= 0:
-        return render_template('error.html')
+
+    if filtro == 'mas' or filtro == 'menos':
+        if filtro == 'mas':
+            pd1 = pd1.drop(pd1.index[pd1['ratio'] < 50], axis = 0)
+        else:
+            pd1 = pd1.drop(pd1.index[pd1['ratio'] >= 50], axis=0)
     else:
-        return plotlyNoArgs(pd1)
+        pd1 = pd1.head(int(filtro))
+        if filtro <= '0':
+            return render_template('error.html')
+
+    return plotlyNoArgs(pd1)
 
 
 @app.route('/plotly.html')
 def plotlyNoArgs(pd2=None):
-    from plotly.subplots import make_subplots
 
     if pd2 is not None:
         pd1 = pd2
     else:
         pd1 = usersVuln()
 
-    x = pd1["nombre"]
+    from plotly.subplots import make_subplots
 
     ejex = pd1["nombre"]
 
@@ -128,6 +164,7 @@ def plotlyNoArgs(pd2=None):
         marker_color='gold'
     ), secondary_y=True, )
 
+
     # Here we modify the tickangle of the xaxis, resulting in rotated labels.
     fig.update_layout(barmode='group', xaxis_tickangle=-45)
 
@@ -137,6 +174,64 @@ def plotlyNoArgs(pd2=None):
     graphJSON = json.dumps(fig, cls=a)
     return render_template('plotly.html', graphJSON=graphJSON)
 
+
+@app.route('/parametro', methods=['POST'])
+def parametro():
+    filtro = request.form['numero']
+    return plotly_web(filtro)
+
+
+@app.route('/plotly_webs.html/<filtro>')
+def plotly_web(filtro):
+    pd1 = websVuln()
+    pd1 = pd1.head(int(filtro))
+    if int(filtro) <= 0:
+        return render_template('error.html')
+    else:
+        return plotly_webNoArgs(pd1)
+
+
+@app.route('/plotly_webs.html')
+def plotly_webNoArgs(pd2=None):
+
+    if pd2 is not None:
+        pd1 = pd2
+    else:
+        pd1 = websVuln()
+
+    from plotly.subplots import make_subplots
+
+    ejex = pd1["url"]
+
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    fig.add_trace(go.Bar(
+        x=ejex,
+        y=pd1['cookies'],
+        name='cookies',
+        marker_color='royalblue'
+    ))
+    fig.add_trace(go.Bar(
+        x=ejex,
+        y=pd1['aviso'],
+        name='Aviso',
+        marker_color='darkorange'
+    ))
+    fig.add_trace(go.Bar(
+        x=ejex,
+        y=pd1['proteccion_de_datos'],
+        name='Protección de datos',
+        marker_color='lightgray'
+    ), secondary_y=False)
+
+    # Here we modify the tickangle of the xaxis, resulting in rotated labels.
+    fig.update_layout(barmode='group', xaxis_tickangle=-45)
+
+    import plotly
+
+    a = plotly.utils.PlotlyJSONEncoder
+    graphJSON = json.dumps(fig, cls=a)
+    return render_template('plotly_webs.html', graphJSON=graphJSON)
 
 if __name__ == '__main__':
     app.run(debug=True)
