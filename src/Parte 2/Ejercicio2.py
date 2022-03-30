@@ -38,7 +38,7 @@ def usersVuln():
 
     # Se añade una nueva columna que será el ratio de email clicados en función de los emails de phishing
     pd1['ratio'] = (pd1['email_clicados'] * 100) / pd1['email_phishing']
-
+    pd1['ratio'] = pd1['ratio'].fillna(0)
     # Se ordena el Dataframe en función de la columna ratio
     pd1 = pd1.sort_values('ratio', ascending=False)
 
@@ -166,7 +166,11 @@ def plotlyNoArgs(pd2=None):
 
 
     # Here we modify the tickangle of the xaxis, resulting in rotated labels.
-    fig.update_layout(barmode='group', xaxis_tickangle=-45)
+    fig.update_layout(barmode='group', xaxis_tickangle=-45, legend=dict(bgcolor="white"), paper_bgcolor="rgb(0,0,0,0)", margin=dict(l=40, r=40, b=40, t=40))
+
+    #fig.update_layout(paper_bgcolor="rgb(0,0,0,0)")
+    fig.update_xaxes(color='white', automargin=True)
+    fig.update_yaxes(color='white', automargin=True)
 
     import plotly
 
