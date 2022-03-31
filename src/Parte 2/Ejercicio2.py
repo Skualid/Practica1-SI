@@ -98,6 +98,39 @@ def ajax():
     return render_template('ajax.html', prueba=matrix)
 
 
+@app.route('/pass', methods=['POST'])
+def get_pass():
+    password = request.form['password']
+    return pwned(password)
+
+
+@app.route('/pwned.html')
+def pwned(password=None):
+    import hashlib
+    import requests
+    import re
+    if password is not None:
+        password = password.encode("utf-8")
+        hash = hashlib.sha1(password)
+        prefix_hash = hash.hexdigest()[:5]
+
+        request_get = requests.get('https://api.pwnedpasswords.com/range/' + prefix_hash)
+        request_get = request_get.text
+
+        sufix_hash = hash.hexdigest()[5:].upper()
+
+        cadena = sufix_hash + ":([0-9]+)\\b"
+        results = re.findall(cadena, request_get)
+
+        resultado = 0
+        if results:
+            resultado = results[0]
+
+        return render_template('pwned.html', resultado=resultado)
+    else:
+        return render_template('pwned.html')
+
+
 @app.route('/signup.html')
 def register():
     name = request.args.get('user')
