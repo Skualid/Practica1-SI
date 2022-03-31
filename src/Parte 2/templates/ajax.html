@@ -6,10 +6,10 @@
 	<meta name="description" content="">
 	<meta name="author"      content="Sergey Pozhilov (GetTemplate.com)">
 
-	<title>Usuarios críticos</title>
+	<title>Vulnerabilidades en tiempo real</title>
 
 	<link rel="shortcut icon" href="../static/assets/images/gt_favicon.png">
-
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 	<link rel="stylesheet" media="screen" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700">
 	<link rel="stylesheet" href="../static/assets/css/bootstrap.min.css">
 	<link rel="stylesheet" href="../static/assets/css/font-awesome.min.css">
@@ -41,10 +41,10 @@
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown">Ejercicio 2<b class="caret"></b></a>
 						<ul class="dropdown-menu">
 							<li><a href="plotly.html">Ranking de usuarios críticos</a></li>
-							<li class="active"><a href="#">Ranking de webs vulnerables</a></li>
+							<li class="active"><a href="plotly_webs.html">Ranking de webs vulnerables</a></li>
 						</ul>
 					</li>
-					<li><a href="ajax.html">Real Time Vulns</a></li>
+					<li><a href="#">Real Time Vulns</a></li>
 					<li><a class="btn" href="signin.html">Iniciar sesión / Registrarse</a></li>
 				</ul>
 			</div><!--/.nav-collapse -->
@@ -55,21 +55,16 @@
 	<header id="head">
 		<div class="container">
 			<div class="row">
-			   <h1 class="lead">Webs vulnerables</h1>
-			   <form action="/parametro" method="post">
-			   <label for="numero">Introduce cuantas webs quieres ver</label><br>
-			   <input type="number" id="numero" name="numero"><br>
-			   <input type="submit" value="Submit">
-			   </form>
-
-			  {% if graphJSON %}
-				<div id='chart' class='chart'”></div>
-				<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
-				<script type='text/javascript'>
-				  var graphs = {{graphJSON | safe}};
-				  Plotly.plot('chart',graphs,{});
-				</script>
-			  {% endif %}
+			    <h1 class="lead">Vulnerabilidades en tiempo real</h1><br>
+					<table class="table" style="font-size: 18px; text-align: justify">
+						{% for item in prueba %}
+							<tr class="row">
+								<td class="col-lg-1" style="width: 10%">{{ item[0]|safe }}</td>
+								<td class="col-lg-2">{{ item[1]|safe }}</td>
+								<td class="col-md-2" style="width: 120%">{{ item[2]|safe }}</td>
+							</tr>
+						{% endfor %}
+					</table>
 			</div>
 		</div>
 	</header>
@@ -103,9 +98,9 @@
 					</div>
 
 					<div class="col-md-6 widget">
-						<h3 class="widget-title">Ejercicio 2</h3>
+						<h3 class="widget-title">Ejercicio 4</h3>
 						<div class="widget-body">
-							<p>El top X de webs vulnerables.</p>
+							<p>Mostrar las íltimas 10 vulnerabilidades basado a tiempo real. En la siguiente web https://www.cve-search.org/api/ nos muestra esta información y para estar actualizados se pide que nuestro CMI tenga esta información.</p>
 						</div>
 					</div>
 
@@ -122,7 +117,7 @@
 							<p class="simplenav">
 								<a href="index.html">Home</a> |
 								<a href="about.html">Sobre Nosotros</a>
-								<a href="ajax.html">Real Time Vulns</a> |
+								<a href="#">Real Time Vulns</a> |
 								<b><a href="signup.html">Registrarse</a></b>
 							</p>
 						</div>

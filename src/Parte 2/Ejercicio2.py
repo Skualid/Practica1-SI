@@ -8,7 +8,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 import json
 import plotly.graph_objects as go
-
+from urllib.request import urlopen
 
 def usersVuln():
     con = sqlite3.connect('example.db')
@@ -83,6 +83,20 @@ def login():
     name = request.args.get('user')
     return render_template('signin.html', name=name, graphJSON=None)
 
+@app.route('/ajax.html')
+def ajax():
+    import requests
+
+    x = requests.get('https://cve.circl.lu/api/last')
+    cves = x.json()
+
+    matrix = []
+    for i in range(10):
+        matrix.append([cves[i]["last-modified"], cves[i]["id"], cves[i]["summary"]])
+        print(matrix[i])
+
+    return render_template('ajax.html', prueba=matrix)
+
 
 @app.route('/signup.html')
 def register():
@@ -117,9 +131,9 @@ def plotly(filtro):
         else:
             pd1 = pd1.drop(pd1.index[pd1['ratio'] >= 50], axis=0)
     else:
-        pd1 = pd1.head(int(filtro))
-        if filtro <= '0':
+        if filtro <= '0' or len(filtro) == 0:
             return render_template('error.html')
+        pd1 = pd1.head(int(filtro))
 
     return plotlyNoArgs(pd1)
 
@@ -188,11 +202,11 @@ def parametro():
 @app.route('/plotly_webs.html/<filtro>')
 def plotly_web(filtro):
     pd1 = websVuln()
-    pd1 = pd1.head(int(filtro))
-    if int(filtro) <= 0:
+    if filtro <= '0' or len(filtro) == 0:
         return render_template('error.html')
-    else:
-        return plotly_webNoArgs(pd1)
+
+    pd1 = pd1.head(int(filtro))
+    return plotly_webNoArgs(pd1)
 
 
 @app.route('/plotly_webs.html')
