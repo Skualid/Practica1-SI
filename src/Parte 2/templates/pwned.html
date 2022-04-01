@@ -62,9 +62,19 @@
 			    <input class="fa-file-text-o"  type="password" id="password" name="password">
 				<button type="submit" class="send">Pwned?</button>
 			    </form>
-
-				<h2 class="lead">{{resultado}}</h2>
-				</table>
+				<br>
+				{% if resultado == 0 %}
+					<div class="container" style="background-color: #3e8e41">
+						<h2 class="lead"> Puedes estar tranquilo o no</h2>
+						<p style="font-size: 18px">Que no haya sido vista antes no quiere decir que sea una contraseña fuerte, sigue las buenas prácticas y usa un gestor de contraseñas</p>
+					</div>
+					{% else %}
+						<div class="container" style="background-color: #ac2925">
+							<h2 class="lead">Estas pwned!</h2>
+							<h3 class="lead">Esta password ha sido vista {{resultado}} veces</h3>
+							<p style="font-size: 18px">Considera cambiar de contraseña</p>
+						</div>
+				{% endif %}
 			</div>
 		</div>
 	</header>
@@ -98,9 +108,9 @@
 					</div>
 
 					<div class="col-md-6 widget">
-						<h3 class="widget-title">Ejercicio 4</h3>
+						<h3 class="widget-title">Ejercicio 5</h3>
 						<div class="widget-body">
-							<p>Mostrar las íltimas 10 vulnerabilidades basado a tiempo real. En la siguiente web https://www.cve-search.org/api/ nos muestra esta información y para estar actualizados se pide que nuestro CMI tenga esta información.</p>
+							<p>Llamada a la API de Have I been pwned, para saber si tu contraseña esta almacenada en su BD</p>
 						</div>
 					</div>
 
@@ -116,7 +126,7 @@
 						<div class="widget-body">
 							<p class="simplenav">
 								<a href="index.html">Home</a> |
-								<a href="about.html">Sobre Nosotros</a>
+								<a href="about.html">Sobre Nosotros</a> |
 								<a href="ajax.html">Real Time Vulns</a> |
                                 <a href="#">Pwned?</a> |
 								<b><a href="signup.html">Registrarse</a></b>
