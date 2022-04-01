@@ -128,7 +128,7 @@ def pwned(password=None):
 
         return render_template('pwned.html', resultado=resultado)
     else:
-        return render_template('pwned.html')
+        return render_template('pwned.html', resultado=-1)
 
 
 @app.route('/signup.html')

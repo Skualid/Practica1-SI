@@ -63,17 +63,23 @@
 				<button type="submit" class="send">Pwned?</button>
 			    </form>
 				<br>
-				{% if resultado == 0 %}
-					<div class="container" style="background-color: #3e8e41">
-						<h2 class="lead"> Puedes estar tranquilo o no</h2>
-						<p style="font-size: 18px">Que no haya sido vista antes no quiere decir que sea una contraseña fuerte, sigue las buenas prácticas y usa un gestor de contraseñas</p>
-					</div>
-					{% else %}
-						<div class="container" style="background-color: #ac2925">
-							<h2 class="lead">Estas pwned!</h2>
-							<h3 class="lead">Esta password ha sido vista {{resultado}} veces</h3>
-							<p style="font-size: 18px">Considera cambiar de contraseña</p>
+                {% if resultado == -1 %}
+				<div class="containerpass" style="background-color: transparent">
+					<h2 class="lead"> ¿Tu contraseña es segura?</h2>
+				</div>
+				{% else %}
+					{% if resultado == 0 %}
+						<div class="containerpass" style="background-color: #3e8e41">
+							<h2 class="lead"> Puedes estar tranquilo o no</h2>
+							<p style="font-size: 18px">Que no haya sido vista antes no quiere decir que sea una contraseña fuerte, sigue las buenas prácticas y usa un gestor de contraseñas</p>
 						</div>
+						{% else %}
+							<div class="containerpass" style="background-color: #ac2925">
+								<h2 class="lead">Estas pwned!</h2>
+								<h3 class="lead">Esta password ha sido vista {{resultado}} veces</h3>
+								<p style="font-size: 18px">Considera cambiar de contraseña</p>
+							</div>
+					{% endif %}
 				{% endif %}
 			</div>
 		</div>

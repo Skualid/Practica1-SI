@@ -143,3 +143,12 @@ img.pull-left { margin-right: 10px; }
 .send:hover::before {
  width: 110%;
 }
+
+.containerpass {
+    margin-right: auto;
+    margin-left: auto;
+    margin-bottom: 40px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 5px;
+}
