@@ -4,11 +4,11 @@ from flask import request
 import sqlite3
 import pandas as pd
 import warnings
-
 warnings.simplefilter(action='ignore', category=FutureWarning)
 import json
 import plotly.graph_objects as go
 from urllib.request import urlopen
+
 
 def usersVuln():
     con = sqlite3.connect('example.db')
@@ -44,6 +44,7 @@ def usersVuln():
 
     return pd1
 
+
 def websVuln():
     con = sqlite3.connect('example.db')
     cursorObj = con.cursor()
@@ -64,6 +65,38 @@ def websVuln():
     return pd2
 
 
+def mean_conex():
+    con = sqlite3.connect('example.db')
+    cursorObj = con.cursor()
+
+    # Sacamos todos los usuarios
+    cursorObj.execute(
+        'SELECT i.nombre, COUNT(i.ip), u.contraseña FROM usuarios u  CROSS JOIN ip i on u.nombre = i.nombre GROUP BY(i.nombre)')
+    all_user = cursorObj.fetchall()
+    pd4 = pd.DataFrame(all_user)
+    pd4.rename(columns={0: "usuarios", 1: "conexiones_totales", 2: "contraseña"}, inplace=True)
+
+    listaVuln = []
+
+    # Eliminamos los usuarios con pass pwned
+    for user in range(len(pd4)):
+        bool = False
+        with open('passwords_pwned.txt', 'r') as f:
+            for password in f:
+                password = password.strip('\n')
+                if pd4.iloc[user, 2] == password:
+                    bool = True
+
+        if bool:
+            listaVuln.append("si")
+        else:
+            listaVuln.append("no")
+
+    pd4['esVulnerable'] = listaVuln
+
+    return pd4
+
+
 app = Flask(__name__)
 
 
@@ -82,6 +115,7 @@ def about():
 def login():
     name = request.args.get('user')
     return render_template('signin.html', name=name, graphJSON=None)
+
 
 @app.route('/ajax.html')
 def ajax():
@@ -142,9 +176,10 @@ def param():
     filtro = request.form['numero']
     return plotly(filtro)
 
+
 @app.route('/filtrar', methods=['POST'])
 def filtrar():
-    filtro =  request.form['filtrar']
+    filtro = request.form['filtrar']
 
     if filtro == 'mas' or filtro == 'menos':
         return plotly(filtro)
@@ -153,14 +188,14 @@ def filtrar():
     else:
         return render_template('error.html')
 
+
 @app.route('/plotly.html/<filtro>')
 def plotly(filtro):
-
     pd1 = usersVuln()
 
     if filtro == 'mas' or filtro == 'menos':
         if filtro == 'mas':
-            pd1 = pd1.drop(pd1.index[pd1['ratio'] < 50], axis = 0)
+            pd1 = pd1.drop(pd1.index[pd1['ratio'] < 50], axis=0)
         else:
             pd1 = pd1.drop(pd1.index[pd1['ratio'] >= 50], axis=0)
     else:
@@ -173,7 +208,6 @@ def plotly(filtro):
 
 @app.route('/plotly.html')
 def plotlyNoArgs(pd2=None):
-
     if pd2 is not None:
         pd1 = pd2
     else:
@@ -211,16 +245,16 @@ def plotlyNoArgs(pd2=None):
         marker_color='gold'
     ), secondary_y=True, )
 
-
     # Here we modify the tickangle of the xaxis, resulting in rotated labels.
-    fig.update_layout(barmode='group', xaxis_tickangle=-45, legend=dict(bgcolor= 'rgba(0,75,154,0.4)'), paper_bgcolor="rgb(0,0,0,0)", margin=dict(l=40, r=40, b=40, t=40), legend_font_color="white")
+    fig.update_layout(barmode='group', xaxis_tickangle=-45, legend=dict(bgcolor='rgba(0,75,154,0.4)'),
+                      paper_bgcolor="rgb(0,0,0,0)", margin=dict(l=40, r=40, b=40, t=40), legend_font_color="white")
 
-    #fig.update_layout(paper_bgcolor="rgb(0,0,0,0)")
+    # fig.update_layout(paper_bgcolor="rgb(0,0,0,0)")
     fig.update_xaxes(color='white', automargin=True)
     fig.update_yaxes(color='white', automargin=True)
 
     fig.update_layout({
-    'plot_bgcolor': 'rgba(30,25,30,0.4)',
+        'plot_bgcolor': 'rgba(30,25,30,0.4)',
     })
 
     import plotly
@@ -248,7 +282,6 @@ def plotly_web(filtro):
 
 @app.route('/plotly_webs.html')
 def plotly_webNoArgs(pd2=None):
-
     if pd2 is not None:
         pd1 = pd2
     else:
@@ -302,6 +335,73 @@ def plotly_webNoArgs(pd2=None):
     a = plotly.utils.PlotlyJSONEncoder
     graphJSON = json.dumps(fig, cls=a)
     return render_template('plotly_webs.html', graphJSON=graphJSON)
+
+@app.route('/userVuln', methods=['POST'])
+def userVuln():
+    filtro = request.form['user']
+
+    if filtro == 'si' or filtro == 'no':
+        pd1 = mean_conex()
+        if filtro == 'si':
+            pd1 = pd1.drop(pd1.index[pd1['esVulnerable'] == 'no'], axis=0)
+        else:
+            pd1 = pd1.drop(pd1.index[pd1['esVulnerable'] == 'si'], axis=0)
+
+        return plotly_conex(pd1)
+    elif filtro == 'reset':
+        return plotly_conex()
+
+    else:
+        return render_template('error.html')
+
+@app.route('/plotly_conex.html')
+def plotly_conex(pd4=None):
+    if pd4 is not None:
+        pd1 = pd4
+    else:
+        pd1 = mean_conex()
+
+    from plotly.subplots import make_subplots
+
+    ejex = pd1["usuarios"]
+
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    fig.add_trace(go.Bar(
+        x=ejex,
+        y=pd1['conexiones_totales'],
+        name='Conexiones',
+        marker_color='darkorange'
+    ))
+    fig.add_trace(go.Scatter(
+        x=ejex,
+        y=pd1["conexiones_totales"],
+        name='Conexiones totales',
+        marker_color='gold'
+    ), secondary_y=True, )
+
+
+    # Here we modify the tickangle of the xaxis, resulting in rotated labels.
+    fig.update_layout(barmode='group', xaxis_tickangle=-45, legend=dict(bgcolor='rgba(0,75,154,0.4)'),
+                      paper_bgcolor="rgb(0,0,0,0)", margin=dict(l=40, r=40, b=40, t=40), legend_font_color="white")
+
+    # fig.update_layout(paper_bgcolor="rgb(0,0,0,0)")
+    fig.update_xaxes(color='white', automargin=True)
+    fig.update_yaxes(color='white', automargin=True)
+
+    fig.update_layout({
+        'plot_bgcolor': 'rgba(30,25,30,0.4)',
+    })
+
+    import plotly
+
+    a = plotly.utils.PlotlyJSONEncoder
+    graphJSON = json.dumps(fig, cls=a)
+    return render_template('plotly_conex.html', graphJSON=graphJSON)
+
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
