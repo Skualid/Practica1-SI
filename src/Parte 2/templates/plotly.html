@@ -58,17 +58,20 @@
 			    <h1 class="lead">Usuarios vulnerables</h1>
 			    <form action="/param" method="post">
 			    <label for="numero">Introduce cuantos usuarios quieres ver</label><br>
-			    <input type="number" id="numero" name="numero"><br>
-			    <input type="submit" value="Submit">
+			    <input type="number" id="numero" name="numero">
+			    <button type="submit" class="send">Enviar</button>
 			    </form>
-
-			    <form action="/filtrar" method="post">
-			    <select name="filtrar" id="filtrar">
+				<h2>FILTROS</h2>
+			    <form action="/filtrar" method="post" class="btn-group">
+					<button name="filtrar" value="mas" class="button">Igual o más del 50%</button>
+					<button name="filtrar" value="menos" class="button">Menos del 50%</button>
+					<button name="filtrar" value="reset" class="button">Quitar filtro</button>
+			    <!---<select name="filtrar" id="filtrar">
 					<option value="mas" SELECTED>Igual o más del 50%</option>
 					<option value="menos" SELECTED>Menos del 50%</option>
 					<option value="reset" SELECTED>Quitar filtro</option>
 			    </select>
-			    <button type="submit">Enviar</button>
+			    <button type="submit">Enviar</button>!--->
 			    </form>
 
 			    {% if graphJSON %}

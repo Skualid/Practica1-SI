@@ -43,8 +43,8 @@ ul.list-spaces li{ margin-bottom:10px; }
 
 /* Helpers */
 .container-full { margin: 0 auto; width: 100%; }
-.top-space { margin-top: 60px; }
-.top-margin { margin-top:20px; }
+.top-space { margin-top: auto; }
+.top-margin { margin-top: auto; }
 
 img { max-width:100%; }
 img.pull-right { margin-left: 10px; }
@@ -65,7 +65,7 @@ img.pull-left { margin-right: 10px; }
 .footer1 { background: #232323; padding: 30px 0 0 0; font-size: 12px; color: #999; }
 	.footer1 a { color: #ccc; }
 		.footer1 a:hover {color: #fff; }
-	.footer1 .widget { margin-bottom:30px; }		
+	.footer1 .widget { margin-bottom:30px; }
 	.footer1 .widget-title { font-size: 17px; font-weight: bold; color: #ccc; margin: 0 0 20px; }
 	.footer1 .entry-meta { border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; margin: 0 0 35px 0; padding: 2px 0; color: #888888; font-size: 12px; font-size: 0.75rem; }
 		.footer1 .entry-meta a { color: #333333; }
@@ -79,4 +79,67 @@ img.pull-left { margin-right: 10px; }
 		.footer2 p { margin: 0; }
 
 	.widget-simplenav { margin-left:-5px; }		
-	.widget-simplenav a{ margin:0 5px; }		
+	.widget-simplenav a{ margin:0 5px; }
+
+
+
+
+
+
+.btn-group .button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  float: left;
+}
+
+.btn-group .button:hover {
+  background-color: #3e8e41;
+}
+
+
+/* From cssbuttons.io by @alexroumi */
+.send {
+ padding: 3px 15px;
+ border: unset;
+ border-radius: 5px;
+ color: #212121;
+ z-index: 1;
+ background: #e8e8e8;
+ position: relative;
+ font-weight: 1000;
+ font-size: 17px;
+ -webkit-box-shadow: 4px 8px 19px -3px rgba(0,0,0,0.27);
+ box-shadow: 4px 8px 19px -3px rgba(0,0,0,0.27);
+ transition: all 250ms;
+ overflow: hidden;
+}
+
+.send::before {
+ content: "";
+ position: absolute;
+ top: 0;
+ left: 0;
+ height: 110%;
+ width: 0;
+ border-radius: 1px;
+ background-color: #212121;
+ z-index: -1;
+ -webkit-box-shadow: 5px 9px 20px -3px rgba(0,0,0,0.27);
+ box-shadow: 5px 9px 20px -3px rgba(0,0,0,0.27);
+ transition: all 250ms
+}
+
+.send:hover {
+ color: #e8e8e8;
+}
+
+.send:hover::before {
+ width: 110%;
+}
