@@ -7,7 +7,6 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 import json
 import plotly.graph_objects as go
-from urllib.request import urlopen
 
 
 def usersVuln():
@@ -365,7 +364,7 @@ def plotly_conex(pd4=None):
 
     ejex = pd1["usuarios"]
 
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig = make_subplots()
 
     fig.add_trace(go.Bar(
         x=ejex,
@@ -378,7 +377,7 @@ def plotly_conex(pd4=None):
         y=pd1["conexiones_totales"],
         name='Conexiones totales',
         marker_color='gold'
-    ), secondary_y=True, )
+    ))
 
 
     # Here we modify the tickangle of the xaxis, resulting in rotated labels.
