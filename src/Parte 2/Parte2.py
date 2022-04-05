@@ -275,18 +275,13 @@ def plotly_conex(pd4=None):
         x=ejex,
         y=pd1['conexiones_totales'],
         name='Conexiones',
-        marker_color='darkorange'
-    ))
-    fig.add_trace(go.Scatter(
-        x=ejex,
-        y=pd1["conexiones_totales"],
-        name='Conexiones totales',
-        marker_color='gold'
+        marker=dict(color=pd1['conexiones_totales'], coloraxis='coloraxis')
     ))
 
     fig.update_layout(barmode='group', xaxis_tickangle=-45, legend=dict(bgcolor='rgba(0,75,154,0.4)'),
                       paper_bgcolor="rgb(0,0,0,0)", margin=dict(l=40, r=40, b=40, t=40), legend_font_color="white",
-                      plot_bgcolor='rgba(30,25,30,0.4)')
+                      plot_bgcolor='rgba(30,25,30,0.4)', coloraxis=dict(colorscale='viridis'),
+                      coloraxis_showscale=False)
 
     fig.update_xaxes(color='white', automargin=True)
     fig.update_yaxes(color='white', automargin=True)
