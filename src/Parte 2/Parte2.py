@@ -1,100 +1,12 @@
+import warnings
+import json
+import plotly.graph_objects as go
+import Parte2funciones as funciones
 from flask import Flask
 from flask import render_template
 from flask import request
-import sqlite3
-import pandas as pd
-import warnings
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
-import json
-import plotly.graph_objects as go
-
-
-def usersVuln():
-    con = sqlite3.connect('example.db')
-    cursorObj = con.cursor()
-
-    cursorObj.execute('SELECT contraseña FROM usuarios')
-    user = cursorObj.fetchall()
-    pd1 = pd.DataFrame(user)
-    pd1.rename(columns={0: "contraseña"}, inplace=True)
-
-    with open('password.txt', 'w') as f:
-        f.write(pd1.to_string(index=False, header=False))
-
-    pd1 = pd.DataFrame()
-    with open('passwords_pwned.txt', 'r') as f:
-        for password in f:
-            password = password.strip('\n')
-            cursorObj.execute(
-                'SELECT nombre, email_total, email_phishing, email_clicados FROM usuarios WHERE contraseña=?',
-                [password])
-            user = cursorObj.fetchall()
-            pd1 = pd1.append(user, ignore_index=True)
-
-    con.close()
-
-    pd1.rename(columns={0: "nombre", 1: "email_totales", 2: "email_phishing", 3: "email_clicados"}, inplace=True)
-
-    # Se añade una nueva columna que será el ratio de email clicados en función de los emails de phishing
-    pd1['ratio'] = (pd1['email_clicados'] * 100) / pd1['email_phishing']
-    pd1['ratio'] = pd1['ratio'].fillna(0)
-    # Se ordena el Dataframe en función de la columna ratio
-    pd1 = pd1.sort_values('ratio', ascending=False)
-
-    return pd1
-
-
-def websVuln():
-    con = sqlite3.connect('example.db')
-    cursorObj = con.cursor()
-
-    cursorObj.execute('SELECT url, cookies, aviso, proteccion_de_datos FROM legal')
-    legal = cursorObj.fetchall()
-    con.close()
-
-    pd2 = pd.DataFrame(legal)
-    pd2.rename(columns={0: "url", 1: "cookies", 2: "aviso", 3: "proteccion_de_datos"}, inplace=True)
-
-    # Se añade una nueva columna que será el número total de políticas que cumple la web
-    pd2['total_politicas'] = pd2['cookies'] + pd2['aviso'] + pd2['proteccion_de_datos']
-
-    # Se ordena el Dataframe en función de la columna total_politicas
-    pd2 = pd2.sort_values('total_politicas', ascending=True)
-
-    return pd2
-
-
-def mean_conex():
-    con = sqlite3.connect('example.db')
-    cursorObj = con.cursor()
-
-    # Sacamos todos los usuarios
-    cursorObj.execute(
-        'SELECT i.nombre, COUNT(i.ip), u.contraseña FROM usuarios u  CROSS JOIN ip i on u.nombre = i.nombre GROUP BY(i.nombre)')
-    all_user = cursorObj.fetchall()
-    pd4 = pd.DataFrame(all_user)
-    pd4.rename(columns={0: "usuarios", 1: "conexiones_totales", 2: "contraseña"}, inplace=True)
-
-    listaVuln = []
-
-    # Eliminamos los usuarios con pass pwned
-    for user in range(len(pd4)):
-        bool = False
-        with open('passwords_pwned.txt', 'r') as f:
-            for password in f:
-                password = password.strip('\n')
-                if pd4.iloc[user, 2] == password:
-                    bool = True
-
-        if bool:
-            listaVuln.append("si")
-        else:
-            listaVuln.append("no")
-
-    pd4['esVulnerable'] = listaVuln
-
-    return pd4
-
 
 app = Flask(__name__)
 
@@ -126,7 +38,6 @@ def ajax():
     matrix = []
     for i in range(10):
         matrix.append([cves[i]["last-modified"], cves[i]["id"], cves[i]["summary"]])
-        print(matrix[i])
 
     return render_template('ajax.html', prueba=matrix)
 
@@ -190,7 +101,7 @@ def filtrar():
 
 @app.route('/plotly.html/<filtro>')
 def plotly(filtro):
-    pd1 = usersVuln()
+    pd1 = funciones.usersVuln()
 
     if filtro == 'mas' or filtro == 'menos':
         if filtro == 'mas':
@@ -210,7 +121,7 @@ def plotlyNoArgs(pd2=None):
     if pd2 is not None:
         pd1 = pd2
     else:
-        pd1 = usersVuln()
+        pd1 = funciones.usersVuln()
 
     from plotly.subplots import make_subplots
 
@@ -244,17 +155,12 @@ def plotlyNoArgs(pd2=None):
         marker_color='gold'
     ), secondary_y=True, )
 
-    # Here we modify the tickangle of the xaxis, resulting in rotated labels.
     fig.update_layout(barmode='group', xaxis_tickangle=-45, legend=dict(bgcolor='rgba(0,75,154,0.4)'),
-                      paper_bgcolor="rgb(0,0,0,0)", margin=dict(l=40, r=40, b=40, t=40), legend_font_color="white")
+                      paper_bgcolor="rgb(0,0,0,0)", margin=dict(l=40, r=40, b=40, t=40), legend_font_color="white",
+                      plot_bgcolor='rgba(30,25,30,0.4)')
 
-    # fig.update_layout(paper_bgcolor="rgb(0,0,0,0)")
     fig.update_xaxes(color='white', automargin=True)
     fig.update_yaxes(color='white', automargin=True)
-
-    fig.update_layout({
-        'plot_bgcolor': 'rgba(30,25,30,0.4)',
-    })
 
     import plotly
 
@@ -271,7 +177,7 @@ def parametro():
 
 @app.route('/plotly_webs.html/<filtro>')
 def plotly_web(filtro):
-    pd1 = websVuln()
+    pd1 = funciones.websVuln()
     if filtro <= '0' or len(filtro) == 0:
         return render_template('error.html')
 
@@ -284,7 +190,7 @@ def plotly_webNoArgs(pd2=None):
     if pd2 is not None:
         pd1 = pd2
     else:
-        pd1 = websVuln()
+        pd1 = funciones.websVuln()
 
     from plotly.subplots import make_subplots
 
@@ -319,15 +225,12 @@ def plotly_webNoArgs(pd2=None):
 
     # Here we modify the tickangle of the xaxis, resulting in rotated labels.
     fig.update_layout(barmode='group', xaxis_tickangle=-45, legend=dict(bgcolor='rgba(0,75,154,0.4)'),
-                      paper_bgcolor="rgb(0,0,0,0)", margin=dict(l=40, r=40, b=40, t=40), legend_font_color="white")
+                      paper_bgcolor="rgb(0,0,0,0)", margin=dict(l=40, r=40, b=40, t=40), legend_font_color="white",
+                      plot_bgcolor='rgba(30,25,30,0.4)')
 
     # fig.update_layout(paper_bgcolor="rgb(0,0,0,0)")
     fig.update_xaxes(color='white', automargin=True)
     fig.update_yaxes(color='white', automargin=True, showticklabels=False)
-
-    fig.update_layout({
-        'plot_bgcolor': 'rgba(30,25,30,0.4)',
-    })
 
     import plotly
 
@@ -335,12 +238,13 @@ def plotly_webNoArgs(pd2=None):
     graphJSON = json.dumps(fig, cls=a)
     return render_template('plotly_webs.html', graphJSON=graphJSON)
 
+
 @app.route('/userVuln', methods=['POST'])
 def userVuln():
     filtro = request.form['user']
 
     if filtro == 'si' or filtro == 'no':
-        pd1 = mean_conex()
+        pd1 = funciones.mean_conex()
         if filtro == 'si':
             pd1 = pd1.drop(pd1.index[pd1['esVulnerable'] == 'no'], axis=0)
         else:
@@ -353,12 +257,13 @@ def userVuln():
     else:
         return render_template('error.html')
 
+
 @app.route('/plotly_conex.html')
 def plotly_conex(pd4=None):
     if pd4 is not None:
         pd1 = pd4
     else:
-        pd1 = mean_conex()
+        pd1 = funciones.mean_conex()
 
     from plotly.subplots import make_subplots
 
@@ -379,18 +284,12 @@ def plotly_conex(pd4=None):
         marker_color='gold'
     ))
 
-
-    # Here we modify the tickangle of the xaxis, resulting in rotated labels.
     fig.update_layout(barmode='group', xaxis_tickangle=-45, legend=dict(bgcolor='rgba(0,75,154,0.4)'),
-                      paper_bgcolor="rgb(0,0,0,0)", margin=dict(l=40, r=40, b=40, t=40), legend_font_color="white")
+                      paper_bgcolor="rgb(0,0,0,0)", margin=dict(l=40, r=40, b=40, t=40), legend_font_color="white",
+                      plot_bgcolor='rgba(30,25,30,0.4)')
 
-    # fig.update_layout(paper_bgcolor="rgb(0,0,0,0)")
     fig.update_xaxes(color='white', automargin=True)
     fig.update_yaxes(color='white', automargin=True)
-
-    fig.update_layout({
-        'plot_bgcolor': 'rgba(30,25,30,0.4)',
-    })
 
     import plotly
 
@@ -399,7 +298,45 @@ def plotly_conex(pd4=None):
     return render_template('plotly_conex.html', graphJSON=graphJSON)
 
 
+@app.route('/plotly_years.html')
+def plotly_years(pd5=None):
+    if pd5 is not None:
+        pd1 = pd5
+    else:
+        pd1 = funciones.years_web()
 
+    ejex = pd1["creacion"]
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Bar(
+        x=ejex,
+        y=pd1['counts_x'],
+        name='1 o 2 políticas',
+        marker_color='darkorange'
+    ))
+
+    fig.add_trace(go.Bar(
+        x=ejex,
+        y=pd1['counts_y'],
+        name='Todas las políticas',
+        marker_color='blue',
+    ))
+
+    fig.update_layout(barmode='stack', xaxis_tickangle=-45, legend=dict(bgcolor='rgba(0,75,154,0.4)'),
+                      paper_bgcolor="rgb(0,0,0,0)", margin=dict(l=40, r=40, b=40, t=40), legend_font_color="white",
+                      xaxis=dict(tickmode='linear'), yaxis=dict(tickmode='linear', tick0=1, dtick=1),
+                      plot_bgcolor='rgba(30,25,30,0.4)')
+
+    fig.update_xaxes(color='white', automargin=True, showgrid=False)
+    fig.update_yaxes(color='white', automargin=True, showgrid=False)
+
+    import plotly
+
+    a = plotly.utils.PlotlyJSONEncoder
+    graphJSON = json.dumps(fig, cls=a)
+
+    return render_template('plotly_years.html', graphJSON=graphJSON)
 
 
 if __name__ == '__main__':
