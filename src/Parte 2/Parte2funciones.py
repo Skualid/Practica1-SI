@@ -2,7 +2,7 @@ import sqlite3
 import pandas as pd
 
 def usersVuln():
-    con = sqlite3.connect('example.db')
+    con = sqlite3.connect('../Parte 1/example.db')
     cursorObj = con.cursor()
 
     cursorObj.execute('SELECT contraseña FROM usuarios')
@@ -10,11 +10,11 @@ def usersVuln():
     pd1 = pd.DataFrame(user)
     pd1.rename(columns={0: "contraseña"}, inplace=True)
 
-    with open('password.txt', 'w') as f:
+    with open('../Parte 1/password.txt', 'w') as f:
         f.write(pd1.to_string(index=False, header=False))
 
     pd1 = pd.DataFrame()
-    with open('passwords_pwned.txt', 'r') as f:
+    with open('../Parte 1/passwords_pwned.txt', 'r') as f:
         for password in f:
             password = password.strip('\n')
             cursorObj.execute(
@@ -37,7 +37,7 @@ def usersVuln():
 
 
 def websVuln():
-    con = sqlite3.connect('example.db')
+    con = sqlite3.connect('../Parte 1/example.db')
     cursorObj = con.cursor()
 
     cursorObj.execute('SELECT url, cookies, aviso, proteccion_de_datos FROM legal')
@@ -57,7 +57,7 @@ def websVuln():
 
 
 def mean_conex():
-    con = sqlite3.connect('example.db')
+    con = sqlite3.connect('../Parte 1/example.db')
     cursorObj = con.cursor()
 
     # Sacamos todos los usuarios
@@ -72,7 +72,7 @@ def mean_conex():
     # Eliminamos los usuarios con pass pwned
     for user in range(len(pd4)):
         bool = False
-        with open('passwords_pwned.txt', 'r') as f:
+        with open('../Parte 1/passwords_pwned.txt', 'r') as f:
             for password in f:
                 password = password.strip('\n')
                 if pd4.iloc[user, 2] == password:
@@ -89,7 +89,7 @@ def mean_conex():
 
 
 def years_web():
-    con = sqlite3.connect('example.db')
+    con = sqlite3.connect('../Parte 1/example.db')
     cursorObj = con.cursor()
 
     cursorObj.execute('SELECT url, cookies, aviso, proteccion_de_datos, creacion FROM legal')
