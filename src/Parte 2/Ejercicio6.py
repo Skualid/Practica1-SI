@@ -1,8 +1,11 @@
 import matplotlib.pyplot as plt
-from sklearn import datasets, linear_model
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn import linear_model
+from sklearn.exceptions import DataConversionWarning
+from sklearn.metrics import mean_squared_error, r2_score, accuracy_score
 import json
 import numpy as np
+import warnings
+warnings.simplefilter(action='ignore', category=DataConversionWarning)
 
 with open('JSON Ejercicios IA-20220426/users_IA_clases.json', 'r') as f:
     data_train = json.load(f)
@@ -30,6 +33,7 @@ data_train_X = matriz_train
 
 # Split the data into training/testing sets
 data_X_train = data_train_X[:20]
+
 data_X_test = data_train_X[20:]
 
 # Split the targets into training/testing sets
@@ -46,13 +50,12 @@ def RegresionLinear():
     # Create linear regression object
     regr = linear_model.LinearRegression()
 
+    print(data_X_test)
     # Train the model using the training sets
     regr.fit(data_X_train, data_y_train)
 
     # Make predictions using the testing set
     data_y_pred = regr.predict(data_X_test)
-
-    #data_pred = regr.predict(data_X_test)
 
     # The coefficients
     print("Coefficients: \n", regr.coef_)
@@ -62,10 +65,20 @@ def RegresionLinear():
     print("Mean squared error: %.2f" % mean_squared_error(data_y_test, data_y_pred))
     # The coefficient of determination: 1 is perfect prediction
     print("Coefficient of determination: %.2f" % r2_score(data_y_test, data_y_pred))
-    print(len(data_X_test), len(data_y_test), len(data_y_pred))
+
+    user_pred = []
+
+    for valor in data_y_pred:
+        if valor < 0.5:
+            user_pred.append(0)
+        else:
+            user_pred.append(1)
+
+    print("Accuracy in Regresion Linear: %.2f" % accuracy_score(data_y_test, user_pred))
+
     # Plot outputs
     plt.scatter(res, data_y_test, color="black")
-    plt.plot(0.02 * np.array(res) + regr.intercept_, res  , color="blue", linewidth=3)
+    plt.plot(0.02 * np.array(res) + regr.intercept_, res, color="blue", linewidth=3)
 
 
     plt.xlabel("Probabilidad de click")
@@ -82,6 +95,18 @@ def decisionTree():
     # Train the model using the training sets
     regr.fit(data_X_train, data_y_train)
 
+    # Make predictions using the testing set
+    data_y_pred = regr.predict(data_X_test)
+
+    user_pred = []
+    for valor in data_y_pred:
+        if valor < 0.5:
+            user_pred.append(0)
+        else:
+            user_pred.append(1)
+
+    print("Accuracy in DecisionTree: %.2f" % accuracy_score(data_y_test, user_pred))
+
     tree.plot_tree(regr, filled=True, fontsize=10, rounded = True, precision=2, proportion=False)
     plt.show()
 
@@ -93,15 +118,24 @@ def forest():
     # Train the model using the training sets
     regr.fit(data_X_train, data_y_train)
 
-    print(str(data_X_train[0]) + " " + str(data_y_train[0]))
-    print(regr.predict([data_X_train[0]]))
+    # Make predictions using the testing set
+    data_y_pred = regr.predict(data_X_test)
+
+    user_pred = []
+    for valor in data_y_pred:
+        if valor < 0.5:
+            user_pred.append(0)
+        else:
+            user_pred.append(1)
+
+    print("Accuracy in Random Forest: %.2f" % accuracy_score(data_y_test, user_pred))
 
     for i in range(len(regr.estimators_)):
-        print(i)
         estimator = regr.estimators_[i]
         tree.plot_tree(estimator, filled=True, fontsize=10, rounded = True, precision=2, proportion=False)
         plt.show()
 
-#forest()
-#decisionTree()
+
 RegresionLinear()
+decisionTree()
+forest()
